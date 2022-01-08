@@ -1,0 +1,11 @@
+DWI NOTES
+----------
+Dev link: http://10.227.178.129:8080/wAIDP/
+
+ISSUES
+------
+-There are no images with 69 volumes
+-What do I need to keep from Reorganizescans.sh
+-Not many files are being converted properly
+-Confirm with Wei-en that everything is working properly so far
+
