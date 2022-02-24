@@ -6,8 +6,7 @@ import sys
 import time
 import subprocess
 
-
-WORKING_DIR = "/home/kerrickcavanaugh/tomcat_dir/Data1/"
+WORKING_DIR = "/home/kerrickcavanaugh/tomcat_dir/Data1"
 OUTPUT_PATH = os.path.join(WORKING_DIR, "AIDP_Data_Raw/")
 # OUTPUT_PATH = "/opt/tomcat/webapps/"
 
@@ -48,22 +47,22 @@ def reformat(OID, jobID, JOBID_PATH):
 
     stdout, stderr = out.communicate()
 
+    #!!!
     # print(stdout)
     # print(stderr)
 
-    # imagingPipeline(OID, jobID)
+    imagingPipeline(jobID)
 
-# imaging pipeline
-# def imagingPipeline(OID, jobID):
-#     subprocess.Popen(['conda', 'create', '-n', 'testenv', 'python=3.8'])
-#     time.sleep(5)
-#     subprocess.Popen(['conda', 'activate', 'myenv'])
-#     time.sleep(5)
-#     subprocess.Popen(['pip', 'install', 'pandas'])
-#     time.sleep(10)
-#     subprocess.Popen(['cd' '/home/kerrickcavanaugh/Data1/CODE'])
-#     time.sleep(5)
-#     subprocess.Popen(['./Master_code', WORKING_DIR])
+#imaging pipeline
+def imagingPipeline(jobID):
+    os.system('conda create -n testenv python=3.8 > /dev/null')
+    os.system('conda activate myenv > /dev/null')
+    os.system('pip install pandas > /dev/null')
+    # os.system('cd {wd}CODE'.format(wd=WORKING_DIR))
+    # os.system('./{wd}CODE/Master_code')
+    # os.system('pwd')
+    os.system('./Master_code {wd} {jbid} > /dev/null'.format(wd=WORKING_DIR, jbid=jobID))
+#./Reorganize_scans.sh /home/kerrickcavanaugh/tomcat_dir/Data1/ /home/kerrickcavanaugh/tomcat_dir/Data1/AIDP_Data_Raw weientest
 
 
 generateJobID()

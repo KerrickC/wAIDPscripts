@@ -62,7 +62,7 @@ def getFilesFromFolder(OID, path, at_parent):
                 if '.LIST' in line:
                     # print("sub folder/file")
                     data = line['.LIST']
-                    # print(data)
+                    
                     oid = ''
                     for val in data:
                         oid = val
@@ -84,109 +84,117 @@ def getFilesFromFolder(OID, path, at_parent):
                         getFilesFromFolder(oid, new_path, False)
 
                     else:
-                        # if file
-                        # get name
-                        file_name = meta['.NAME']
-                        # get the directory where raw data is stored
-                        raw_path = os.path.join(DB_DATA, oid, "raw")
+                        # print(oid)
+                        # print(data)
+                        
 
-                        file_data['files'] += 1
+                        #loop through each file in folder
+                        for f in data:
+                            #get oid of the file
+                            f_oid = f
+                            # print(data[f])
+                            #get file name
+                            file_name = data[f_oid]['.NAME']
 
-                        # needed to account for out of order file parts
-                        file_order = []
-                        for file in os.listdir(raw_path):
-                            # single digit decimal (like 1.4)
-                            try:
-                                file_val = int(file[-2:])
-                                file_order.append(file_val)
-                            except:
-                                # two digit decimal (like 1.25)
-                                file_val = int(file[-1:])
-                                file_order.append(file_val)
+                            
+                            file_data['files'] += 1
 
-                        file_order.sort()
+                            # # get the directory where raw data is stored
+                            raw_path = os.path.join(DB_DATA, f_oid, "raw")
+                            # print(raw_path)
+                                                
+                            # needed to account for out of order file parts
+                            file_order = []
+                            for file in os.listdir(raw_path):
+                                # single digit decimal (like 1.4)
+                                try:
+                                    file_val = int(file[-2:])
+                                    file_order.append(file_val)
+                                except:
+                                    # two digit decimal (like 1.25)
+                                    file_val = int(file[-1:])
+                                    file_order.append(file_val)
 
-                        for file in file_order:
+                            file_order.sort()
 
-                            sub_path = "part1." + str(file)
+                            for file in file_order:
 
-                            # create main woo file (all decompressed files will append to this file)
-                            # open in append binary mode ('ab')
-                            woo_file = open(os.path.join(
-                                path, file_name), "ab")
+                                sub_path = "part1." + str(file)
 
-                            # print(path + file_name + file + "                 ")
+                                # create main woo file (all decompressed files will append to this file)
+                                # open in append binary mode ('ab')
+                                woo_file = open(os.path.join(
+                                    path, file_name), "ab")
 
-                            os.chmod(os.path.join(
-                                path, file_name),
-                                stat.S_IRWXG | stat.S_IRWXU)
+                                # print(path + file_name + file + "                 ")
 
-                            file_size = os.path.getsize(
-                                os.path.join(raw_path, path))
-                            file_data['total_size (bytes)'] += file_size
+                                os.chmod(os.path.join(
+                                    path, file_name),
+                                    stat.S_IRWXG | stat.S_IRWXU)
 
-                            # create a .zlib file for zlib-flate
-                            fn = file_name + sub_path + ".zlib"
-                            new_dcm = open(os.path.join(path, fn), "wb")
+                                file_size = os.path.getsize(
+                                    os.path.join(raw_path, path))
+                                file_data['total_size (bytes)'] += file_size
 
-                            # go through each byte, convert to int, and bit-shift by 1
-                            with open(os.path.join(raw_path, sub_path), "rb") as f:
-                                byte = f.read(1)
-                                while byte != b"":
-                                    byte_val = struct.unpack('B', byte)[0]
+                                # create a .zlib file for zlib-flate
+                                fn = file_name + sub_path + ".zlib"
+                                new_dcm = open(os.path.join(path, fn), "wb")
 
-                                    byte_val = byte_val - 1
-
-                                    if byte_val < 0:
-                                        byte_val = byte_val + 256
-
-                                    by = struct.pack("B", byte_val)
-
-                                    new_dcm.write(by)
-
+                                # go through each byte, convert to int, and bit-shift by 1
+                                with open(os.path.join(raw_path, sub_path), "rb") as f:
                                     byte = f.read(1)
-                            f.close()
+                                    while byte != b"":
+                                        byte_val = struct.unpack('B', byte)[0]
 
-                            new_dcm.close()
+                                        byte_val = byte_val - 1
 
-                            # zlib decompress
-                            new_fn = file_name + sub_path
-                            # zlib_path -> same path as new_dcm
-                            zlib_path = os.path.join(path, fn)
-                            out_file = os.path.join(path, new_fn)
+                                        if byte_val < 0:
+                                            byte_val = byte_val + 256
 
-                            proc = subprocess.Popen(['./zlib.sh', str(zlib_path), str(out_file)],
-                                                    stdout=subprocess.PIPE)
-                            proc.wait()
-                            # print(proc.stdout.read())
+                                        by = struct.pack("B", byte_val)
 
-                            # delete temp zlib file (uncomment)
-                            if(os.path.exists(zlib_path)):
-                                os.remove(zlib_path)
+                                        new_dcm.write(by)
 
-                            # append all files with matching file_name to main file (concatentation)
-                            # if a file matches a main woo, then append to that file
+                                        byte = f.read(1)
+                                f.close()
 
-                            if(os.path.exists(out_file)):
-                                new_path = open(
-                                    out_file, "rb")
+                                new_dcm.close()
 
-                                # print('here')
+                                # zlib decompress
+                                new_fn = file_name + sub_path
+                                # zlib_path -> same path as new_dcm
+                                zlib_path = os.path.join(path, fn)
+                                out_file = os.path.join(path, new_fn)
 
-                                # if a file exists with the current 'file_name' (image has multiple parts)
-                                if(os.path.exists(os.path.join(path, file_name))):
-                                    # print("appending...")
-                                    # read all content from the zlib file
-                                    cnt = new_path.read()
-                                    new_path.close()
-                                    # append to woo_file
-                                    woo_file.write(cnt)
-                                    # delete zlib-flate produced file
-                                    os.remove(out_file)
-                                    woo_file.close()
+                                proc = subprocess.Popen(['./zlib.sh', str(zlib_path), str(out_file)],
+                                                        stdout=subprocess.PIPE)
+                                proc.wait()
+                                # print(proc.stdout.read())
 
-                    print('          ')
+                                # delete temp zlib file (uncomment)
+                                if(os.path.exists(zlib_path)):
+                                    os.remove(zlib_path)
 
+                                # append all files with matching file_name to main file (concatentation)
+                                # if a file matches a main woo, then append to that file
+
+                                if(os.path.exists(out_file)):
+                                    new_path = open(
+                                        out_file, "rb")
+
+                                    # print('here')
+
+                                    # if a file exists with the current 'file_name' (image has multiple parts)
+                                    if(os.path.exists(os.path.join(path, file_name))):
+                                        # print("appending...")
+                                        # read all content from the zlib file
+                                        cnt = new_path.read()
+                                        new_path.close()
+                                        # append to woo_file
+                                        woo_file.write(cnt)
+                                        # delete zlib-flate produced file
+                                        os.remove(out_file)
+                                        woo_file.close()
         return
 
     except Exception as e:
