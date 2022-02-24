@@ -1,0 +1,39 @@
+Packages that are required to run the imaging processing:
+
+MATLAB, FSL, AFNI, ANTsR, dcm2niix, python 3
+
+
+AFNI
+
+https://afni.nimh.nih.gov/pub/dist/doc/htmldoc/background_install/install_instructs/index.html
+
+ 
+
+FSL:
+
+https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSL
+
+ 
+
+dcm2niix
+
+https://github.com/rordenlab/dcm2niix
+
+ 
+
+ANTsR
+
+https://github.com/ANTsX/ANTsR
+
+ 
+
+$ git clone https://github.com/stnava/ITKR.git
+
+$ git clone https://github.com/ANTsX/ANTsRCore.git
+
+$ git clone https://github.com/ANTsX/ANTsR.git
+
+
+The imaging process codes
+
+https://www.dropbox.com/s/qxf8bfdfelkejta/LRN_Production3_Ludacris.rar?dl=0
